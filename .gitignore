@@ -1,0 +1,9 @@
+# Session persistence (do not commit)
+.omo/run-continuation/
+
+# Generated project files
+mobile/.claude/
+mobile/CLAUDE.md
+
+# Dependencies
+node_modules/
