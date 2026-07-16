@@ -1,5 +1,8 @@
 # Yeda — Learning Platform
 
+## Session Startup
+When starting a new session, read `docs/next-session-prompt.md` first — it contains the handoff from the previous session with current state and suggested next steps. If the user says "let's keep going", "continue", or similar, follow that document.
+
 ## Tech Stack
 - **Mobile & Web**: Expo (React Native + TypeScript) with `react-native-web` as web target
 - **Backend**: Supabase (PostgreSQL, Auth, Storage, Row-Level Security)
