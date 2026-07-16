@@ -7,3 +7,11 @@ mobile/CLAUDE.md
 
 # Dependencies
 node_modules/
+
+# Environment
+.env
+mobile/.env
+
+# Test artifacts
+mobile/test-results/
+mobile/playwright-report/

@@ -123,20 +123,27 @@ The safest approach: wrap everything in a `DO $$ ... END $$` block to capture ge
 1. `supabase start` — pulls images, applies migrations, seeds data
 2. Migrations auto-detected from `supabase/migrations/*.sql`
 3. Seed from `supabase/seed.sql` (configured in `config.toml`)
-4. Access Studio at `http://127.0.0.1:54323`
-5. DB at `postgresql://postgres:postgres@127.0.0.1:54322/postgres`
-6. Auth API at `http://localhost:54321/auth/v1`
-7. Expo dev: `npx expo start --web` (from `mobile/`)
+4. Access Studio at `http://127.0.0.1:54333`
+5. DB at `postgresql://postgres:postgres@127.0.0.1:54332/postgres`
+6. Auth API at `http://127.0.0.1:54331/auth/v1`
+7. REST API at `http://127.0.0.1:54331/rest/v1`
+8. Expo dev: `npx expo start --web` (from `mobile/`)
 
 ## RLS Gotchas
-- Helper functions that query the same table their calling policy is on **must** be `SECURITY DEFINER` to avoid infinite recursion → `stack depth limit exceeded`.
+- **AVOID table subqueries in policies**: Helper functions that `SELECT` from the same table their calling policy is on cause `stack depth limit exceeded` (PostgreSQL 15+). Use `auth.jwt() -> 'user_metadata' ->> 'role'` directly instead — no recursion, simpler, and row-level safe.
 - Explicit FK-based joins (e.g., `child:children(name)`) return **arrays** even for `to-one` relationships. Always access via `[0]`.
+- The `profiles` table has **no `email` column** — email lives in `auth.users`. When querying profiles via REST API, don't `select=email`.
 
 ## Expo Router Gotchas
 - `<Stack>` only accepts `<Stack.Screen>` and `<Stack.Protected>` as direct children. Using `<>` fragments inside `<Stack>` causes `"can't convert symbol to string"` runtime error.
 - `Stack.Protected guard={condition}` — when `guard` is falsy, children are excluded from rendering.
 - `href: null` on `<Tabs.Screen>` does **not** cascade to sub-routes. Each sub-route needs its own entry.
 - Route folder renames require updating `Tabs.Screen name` in the layout.
+
+## Auth Gotchas
+- **Auth blocking at app layer**: Supabase Auth API always returns tokens on successful password auth. Blocking pending/rejected users must be done in the auth context's `signIn()`, not at the API level.
+- **`sessionReady` ref**: When using `Stack.Protected`, the layout needs a ref-based guard to prevent the sign-in redirect from firing before the profile fetch completes. See `auth-context.tsx` for the pattern.
+- **E2E approval test targeting**: When many pending users exist, clicking the first "Approve" won't make "No pending approvals" appear. Use the user's UUID from the API signup response to target the specific user.
 
 ## Supabase Realtime
 - Channel names must be unique per subscription. Use dynamic names: `` `events-${Date.now()}-${Math.random()}` `` and track with `useRef` for cleanup.
@@ -165,10 +172,11 @@ When the user says "wrap up" (or equivalent), do the following:
 | Deploy edge functions | `supabase functions deploy <name>` |
 | Generate types from DB | `supabase gen types typescript --linked > utils/supabase-types.ts` |
 | Query local DB | `docker exec -i supabase_db_yeda psql -U postgres -d postgres -c "SELECT ..."` |
-| Auth smoke test | `curl -X POST http://localhost:54321/auth/v1/token?grant_type=password -H "apikey: $ANON_KEY" -H "Content-Type: application/json" -d '{"email":"user@example.com","password":"password123"}'` |
+| Auth smoke test | `curl -X POST http://127.0.0.1:54331/auth/v1/token?grant_type=password -H "apikey: $ANON_KEY" -H "Content-Type: application/json" -d '{"email":"user@example.com","password":"password123"}'` |
+| E2E tests (auth) | `PLAYWRIGHT_HOST_PLATFORM_OVERRIDE=ubuntu24.04-x64 npx playwright test --config=playwright.config.ts` (from `mobile/`) |
 | Check auth logs | `docker logs supabase_auth_yeda --tail 20` |
 | ALTER TYPE enum | `docker exec -i supabase_db_yeda psql -U postgres -d postgres -c "ALTER TYPE <enum> ADD VALUE '<value>';"` |
-| Install deps | `npm install <pkg> --legacy-peer-deps` (from `mobile/`) |
+| Install deps | `npm install <pkg> --legacy-peer-deps` from `mobile/` |
 
 ## Testing Workflow
 Whenever making changes, write or update tests at the appropriate level:
