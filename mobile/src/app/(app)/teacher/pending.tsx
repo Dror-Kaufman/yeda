@@ -6,7 +6,6 @@ import {
   StyleSheet,
   ActivityIndicator,
   FlatList,
-  Alert,
   Platform,
 } from 'react-native';
 import { supabase } from '../../../utils/supabase';
@@ -19,6 +18,7 @@ export default function TeacherPendingScreen() {
   const [pending, setPending] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     loadPendingStudents();
@@ -47,8 +47,9 @@ export default function TeacherPendingScreen() {
       .eq('id', userId);
 
     if (error) {
-      Alert.alert('Error', error.message);
+      setErrorMsg(error.message);
     } else {
+      setErrorMsg(null);
       setPending((prev) => prev.filter((p) => p.id !== userId));
     }
     setProcessing(null);
@@ -85,6 +86,9 @@ export default function TeacherPendingScreen() {
                 <Text style={styles.name}>{item.display_name}</Text>
               </View>
               <Text style={styles.email}>{item.id}</Text>
+              {errorMsg && (
+                <Text style={styles.errorMsg}>{errorMsg}</Text>
+              )}
               <TouchableOpacity
                 style={[styles.approveBtn, processing === item.id && styles.btnDisabled]}
                 onPress={() => handleApprove(item.id)}
@@ -167,5 +171,10 @@ const styles = StyleSheet.create({
   errorText: {
     ...typography.body,
     color: colors.error,
+  },
+  errorMsg: {
+    ...typography.caption,
+    color: colors.error,
+    marginBottom: spacing.sm,
   },
 });

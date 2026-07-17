@@ -3,6 +3,12 @@ import { test, expect } from '@playwright/test';
 const ANON_KEY =
   process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ||
   'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH';
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!SERVICE_ROLE_KEY) {
+  throw new Error(
+    'SUPABASE_SERVICE_ROLE_KEY not set — playwright.config.ts should have set it from supabase status',
+  );
+}
 const AUTH_URL = 'http://127.0.0.1:54331';
 const REST_URL = 'http://127.0.0.1:54331/rest/v1';
 
@@ -23,25 +29,14 @@ const MCQ_JSON = JSON.stringify([
 
 test.describe('MCQ Paste → Publish', () => {
   // Clean up any E2E questions created by this test
+  // Uses service_role key to bypass RLS for reliable cleanup
   test.afterAll(async ({ request }) => {
-    const loginResp = await request.post(
-      `${AUTH_URL}/auth/v1/token?grant_type=password`,
-      {
-        headers: { apikey: ANON_KEY, 'Content-Type': 'application/json' },
-        data: { email: 'teacher@yeda.com', password: 'password123' },
-      },
-    );
-    const body = await loginResp.json();
-    const token: string = body.access_token;
-    if (!token) return;
-
-    // Delete questions created by E2E tests
     await request.delete(
       `${REST_URL}/questions?question_text=like.E2E-%`,
       {
         headers: {
-          apikey: ANON_KEY,
-          Authorization: `Bearer ${token}`,
+          apikey: SERVICE_ROLE_KEY,
+          Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
         },
       },
     );

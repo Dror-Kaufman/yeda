@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Pressable } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { supabase } from '../../../../utils/supabase';
 import { colors, spacing, typography } from '../../../../constants/theme';
 import { useSession } from '../../../../utils/auth-context';
 import { showPrompt } from '../../../../utils/prompt';
+import ConfirmDialog from '../../../../components/ui/ConfirmDialog';
 
 interface Subject {
   id: string;
@@ -18,6 +19,9 @@ export default function SubjectListScreen() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<Subject | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [menuTarget, setMenuTarget] = useState<Subject | null>(null);
   const { profile } = useSession();
   const canManage = profile?.role === 'admin' || profile?.role === 'teacher';
 
@@ -78,37 +82,30 @@ export default function SubjectListScreen() {
   };
 
   const handleDeleteSubject = (subject: Subject) => {
-    Alert.alert(
-      'Delete Subject',
-      `Are you sure you want to delete "${subject.name}"? This will also delete all topics within this subject.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            const { error: deleteError } = await supabase
-              .from('subjects')
-              .delete()
-              .eq('id', subject.id);
-            if (deleteError) {
-              console.error('Failed to delete subject:', deleteError);
-              return;
-            }
-            await fetchData();
-          },
-        },
-      ],
-    );
+    setDeleteConfirm(subject);
+  };
+
+  const confirmDeleteSubject = async () => {
+    if (!deleteConfirm) return;
+    setDeleteLoading(true);
+    const { error: deleteError } = await supabase
+      .from('subjects')
+      .delete()
+      .eq('id', deleteConfirm.id);
+    if (deleteError) {
+      console.error('Failed to delete subject:', deleteError);
+      setDeleteLoading(false);
+      setDeleteConfirm(null);
+      return;
+    }
+    await fetchData();
+    setDeleteLoading(false);
+    setDeleteConfirm(null);
   };
 
   const handleLongPress = (subject: Subject) => {
     if (!canManage) return;
-    Alert.alert(subject.name, undefined, [
-      { text: 'Rename', onPress: () => handleRenameSubject(subject) },
-      { text: 'Delete', style: 'destructive', onPress: () => handleDeleteSubject(subject) },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
+    setMenuTarget(subject);
   };
 
   if (loading) {
@@ -148,6 +145,53 @@ export default function SubjectListScreen() {
           </TouchableOpacity>
         ))}
       </View>
+
+      <ConfirmDialog
+        visible={deleteConfirm !== null}
+        title="Delete Subject"
+        message={
+          deleteConfirm
+            ? `Are you sure you want to delete "${deleteConfirm.name}"? This will also delete all topics within this subject.`
+            : ''
+        }
+        onCancel={() => {
+          setDeleteConfirm(null);
+          setDeleteLoading(false);
+        }}
+        onConfirm={confirmDeleteSubject}
+        loading={deleteLoading}
+      />
+
+      {menuTarget && (
+        <View style={styles.actionOverlay}>
+          <Pressable style={styles.actionBackdrop} onPress={() => setMenuTarget(null)} />
+          <View style={styles.actionCard}>
+            <TouchableOpacity
+              style={styles.actionOption}
+              onPress={() => {
+                handleRenameSubject(menuTarget);
+                setMenuTarget(null);
+              }}
+            >
+              <Text style={styles.actionOptionText}>Rename</Text>
+            </TouchableOpacity>
+            <View style={styles.actionDivider} />
+            <TouchableOpacity
+              style={styles.actionOption}
+              onPress={() => {
+                setDeleteConfirm(menuTarget);
+                setMenuTarget(null);
+              }}
+            >
+              <Text style={[styles.actionOptionText, { color: colors.error }]}>Delete</Text>
+            </TouchableOpacity>
+            <View style={styles.actionDivider} />
+            <TouchableOpacity style={styles.actionOption} onPress={() => setMenuTarget(null)}>
+              <Text style={[styles.actionOptionText, { color: colors.textSecondary }]}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
     </View>
   );
 }
@@ -206,5 +250,46 @@ const styles = StyleSheet.create({
     ...typography.body,
     color: '#FFFFFF',
     fontWeight: '600',
+  },
+  actionOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  actionBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  actionCard: {
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+    width: '80%',
+    maxWidth: 320,
+    overflow: 'hidden',
+  },
+  actionOption: {
+    paddingVertical: 16,
+    paddingHorizontal: spacing.md,
+    alignItems: 'center',
+  },
+  actionOptionText: {
+    ...typography.body,
+    fontWeight: '600',
+    color: colors.textPrimary,
+  },
+  actionDivider: {
+    height: 1,
+    backgroundColor: colors.cardBorder,
   },
 });

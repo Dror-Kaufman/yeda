@@ -6,7 +6,6 @@ import {
   StyleSheet,
   ActivityIndicator,
   ScrollView,
-  Alert,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { supabase } from '../../../../utils/supabase';
@@ -168,7 +167,7 @@ export default function TopicDetailScreen() {
           {isTeacherOrAdmin && (
             <TouchableOpacity
               style={styles.primaryButton}
-              onPress={() => Alert.alert('Coming in Wave 4')}
+              onPress={() => router.push(`/topic/${topicId}/add-material`)}
             >
               <Text style={styles.primaryButtonText}>Add Material</Text>
             </TouchableOpacity>

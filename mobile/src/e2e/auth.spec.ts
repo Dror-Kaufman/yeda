@@ -1,9 +1,28 @@
 import { test, expect } from '@playwright/test';
+import { execSync } from 'child_process';
 
 const TEST_EMAIL = `test-${Date.now()}@yeda.com`;
 const TEST_PASSWORD = 'testpass123';
 
+const UNAPPROVED_STUDENT_EMAIL = 'unapproved_student@yeda.com';
+const UNAPPROVED_STUDENT_PASSWORD = 'password123';
+
+// Clean up test-created users after all tests
+function cleanupTestUsers() {
+  try {
+    execSync(
+      `docker exec -i supabase_db_yeda psql -U postgres -d postgres -c "DELETE FROM auth.users WHERE email LIKE 'test-______%@yeda.com' OR email LIKE 'approve-______%@yeda.com' OR email LIKE 'teacher-______%@yeda.com';"`,
+      { timeout: 10000 },
+    );
+  } catch {
+    // cleanup failure shouldn't fail the test suite
+  }
+}
+
 test.describe('Auth Flow', () => {
+  test.afterAll(() => {
+    cleanupTestUsers();
+  });
   test('signs in as admin', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(1000);
@@ -47,8 +66,8 @@ test.describe('Auth Flow', () => {
 
     await expect(page.getByText('Welcome back to Yeda').first()).toBeVisible();
 
-    await page.getByPlaceholder('Email').first().fill('student@yeda.com');
-    await page.getByPlaceholder('Password').first().fill('password123');
+    await page.getByPlaceholder('Email').first().fill(UNAPPROVED_STUDENT_EMAIL);
+    await page.getByPlaceholder('Password').first().fill(UNAPPROVED_STUDENT_PASSWORD);
 
     await page.getByText('Sign In').last().click({ delay: 50 });
     await page.waitForTimeout(2000);

@@ -5,7 +5,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   ScrollView,
-  Alert,
+  Pressable,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -13,6 +13,7 @@ import { supabase } from '../../../utils/supabase';
 import { colors, spacing, typography } from '../../../constants/theme';
 import { useSession } from '../../../utils/auth-context';
 import { showPrompt } from '../../../utils/prompt';
+import ConfirmDialog from '../../../components/ui/ConfirmDialog';
 
 interface Grade {
   id: string;
@@ -24,6 +25,9 @@ export default function GradeListScreen() {
   const [grades, setGrades] = useState<Grade[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<Grade | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [menuTarget, setMenuTarget] = useState<Grade | null>(null);
   const { profile } = useSession();
   const canManage = profile?.role === 'admin';
 
@@ -82,37 +86,30 @@ export default function GradeListScreen() {
   };
 
   const handleDeleteGrade = (grade: Grade) => {
-    Alert.alert(
-      'Delete Grade',
-      `Are you sure you want to delete "${grade.name}"? This will also delete all subjects and topics within this grade.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            const { error: deleteError } = await supabase
-              .from('grades')
-              .delete()
-              .eq('id', grade.id);
-            if (deleteError) {
-              console.error('Failed to delete grade:', deleteError);
-              return;
-            }
-            await fetchGrades();
-          },
-        },
-      ],
-    );
+    setDeleteConfirm(grade);
+  };
+
+  const confirmDeleteGrade = async () => {
+    if (!deleteConfirm) return;
+    setDeleteLoading(true);
+    const { error: deleteError } = await supabase
+      .from('grades')
+      .delete()
+      .eq('id', deleteConfirm.id);
+    if (deleteError) {
+      console.error('Failed to delete grade:', deleteError);
+      setDeleteLoading(false);
+      setDeleteConfirm(null);
+      return;
+    }
+    await fetchGrades();
+    setDeleteLoading(false);
+    setDeleteConfirm(null);
   };
 
   const handleLongPress = (grade: Grade) => {
     if (!canManage) return;
-    Alert.alert(grade.name, undefined, [
-      { text: 'Rename', onPress: () => handleRenameGrade(grade) },
-      { text: 'Delete', style: 'destructive', onPress: () => handleDeleteGrade(grade) },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
+    setMenuTarget(grade);
   };
 
   if (loading) {
@@ -155,6 +152,53 @@ export default function GradeListScreen() {
           </TouchableOpacity>
         ))}
       </ScrollView>
+
+      <ConfirmDialog
+        visible={deleteConfirm !== null}
+        title="Delete Grade"
+        message={
+          deleteConfirm
+            ? `Are you sure you want to delete "${deleteConfirm.name}"? This will also delete all subjects and topics within this grade.`
+            : ''
+        }
+        onCancel={() => {
+          setDeleteConfirm(null);
+          setDeleteLoading(false);
+        }}
+        onConfirm={confirmDeleteGrade}
+        loading={deleteLoading}
+      />
+
+      {menuTarget && (
+        <View style={styles.actionOverlay}>
+          <Pressable style={styles.actionBackdrop} onPress={() => setMenuTarget(null)} />
+          <View style={styles.actionCard}>
+            <TouchableOpacity
+              style={styles.actionOption}
+              onPress={() => {
+                handleRenameGrade(menuTarget);
+                setMenuTarget(null);
+              }}
+            >
+              <Text style={styles.actionOptionText}>Rename</Text>
+            </TouchableOpacity>
+            <View style={styles.actionDivider} />
+            <TouchableOpacity
+              style={styles.actionOption}
+              onPress={() => {
+                setDeleteConfirm(menuTarget);
+                setMenuTarget(null);
+              }}
+            >
+              <Text style={[styles.actionOptionText, { color: colors.error }]}>Delete</Text>
+            </TouchableOpacity>
+            <View style={styles.actionDivider} />
+            <TouchableOpacity style={styles.actionOption} onPress={() => setMenuTarget(null)}>
+              <Text style={[styles.actionOptionText, { color: colors.textSecondary }]}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
     </View>
   );
 }
@@ -217,5 +261,46 @@ const styles = StyleSheet.create({
     ...typography.body,
     color: '#FFFFFF',
     fontWeight: '600',
+  },
+  actionOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  actionBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  actionCard: {
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+    width: '80%',
+    maxWidth: 320,
+    overflow: 'hidden',
+  },
+  actionOption: {
+    paddingVertical: 16,
+    paddingHorizontal: spacing.md,
+    alignItems: 'center',
+  },
+  actionOptionText: {
+    ...typography.body,
+    fontWeight: '600',
+    color: colors.textPrimary,
+  },
+  actionDivider: {
+    height: 1,
+    backgroundColor: colors.cardBorder,
   },
 });

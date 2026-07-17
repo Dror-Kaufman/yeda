@@ -213,6 +213,7 @@ Whenever making changes, write or update tests at the appropriate level:
 
 - Run ALL existing test levels before committing to confirm nothing broke.
 - For bugs: first write a failing test that reproduces the bug, then fix the code.
+- **E2E tests must clean up after themselves**: Use `test.afterAll` with `docker exec psql` or `SERVICE_ROLE_KEY` (service_role key bypasses RLS) to delete test-created auth users and app data. Use `docker exec -i supabase_db_yeda psql -U postgres -d postgres -c "DELETE FROM auth.users WHERE email LIKE 'pattern-%@yeda.com';"` for `auth.users` cleanup (not accessible via REST API). Use unique email patterns (e.g., `test-${Date.now()}@yeda.com`) so cleanup doesn't accidentally delete seed users.
 
 ## Phase 3 Migration Notes
 - LaTeX rendering: Keep LaTeX strings as plain text. On web use KaTeX, on native use `<WebView>` wrapper.

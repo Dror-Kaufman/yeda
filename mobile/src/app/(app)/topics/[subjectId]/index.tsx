@@ -6,13 +6,14 @@ import {
   StyleSheet,
   ActivityIndicator,
   ScrollView,
-  Alert,
+  Pressable,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { supabase } from '../../../../utils/supabase';
 import { colors, spacing, typography } from '../../../../constants/theme';
 import { useSession } from '../../../../utils/auth-context';
 import { showPrompt } from '../../../../utils/prompt';
+import ConfirmDialog from '../../../../components/ui/ConfirmDialog';
 
 interface TopicRow {
   id: string;
@@ -32,6 +33,9 @@ export default function TopicListScreen() {
   const [topics, setTopics] = useState<TopicRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<TopicRow | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [menuTarget, setMenuTarget] = useState<TopicRow | null>(null);
 
   async function fetchData() {
     const { data: subject, error: subjectError } = await supabase
@@ -110,37 +114,30 @@ export default function TopicListScreen() {
   };
 
   const handleDeleteTopic = (topic: TopicRow) => {
-    Alert.alert(
-      'Delete Topic',
-      `Are you sure you want to delete "${topic.name}"?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            const { error: deleteError } = await supabase
-              .from('topics')
-              .delete()
-              .eq('id', topic.id);
-            if (deleteError) {
-              console.error('Failed to delete topic:', deleteError);
-              return;
-            }
-            await fetchData();
-          },
-        },
-      ],
-    );
+    setDeleteConfirm(topic);
+  };
+
+  const confirmDeleteTopic = async () => {
+    if (!deleteConfirm) return;
+    setDeleteLoading(true);
+    const { error: deleteError } = await supabase
+      .from('topics')
+      .delete()
+      .eq('id', deleteConfirm.id);
+    if (deleteError) {
+      console.error('Failed to delete topic:', deleteError);
+      setDeleteLoading(false);
+      setDeleteConfirm(null);
+      return;
+    }
+    await fetchData();
+    setDeleteLoading(false);
+    setDeleteConfirm(null);
   };
 
   const handleLongPress = (topic: TopicRow) => {
     if (!canManage) return;
-    Alert.alert(topic.name, undefined, [
-      { text: 'Rename', onPress: () => handleRenameTopic(topic) },
-      { text: 'Delete', style: 'destructive', onPress: () => handleDeleteTopic(topic) },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
+    setMenuTarget(topic);
   };
 
   if (loading) {
@@ -200,6 +197,51 @@ export default function TopicListScreen() {
             </TouchableOpacity>
           ))}
         </ScrollView>
+      )}
+
+      <ConfirmDialog
+        visible={deleteConfirm !== null}
+        title="Delete Topic"
+        message={
+          deleteConfirm ? `Are you sure you want to delete "${deleteConfirm.name}"?` : ''
+        }
+        onCancel={() => {
+          setDeleteConfirm(null);
+          setDeleteLoading(false);
+        }}
+        onConfirm={confirmDeleteTopic}
+        loading={deleteLoading}
+      />
+
+      {menuTarget && (
+        <View style={styles.actionOverlay}>
+          <Pressable style={styles.actionBackdrop} onPress={() => setMenuTarget(null)} />
+          <View style={styles.actionCard}>
+            <TouchableOpacity
+              style={styles.actionOption}
+              onPress={() => {
+                handleRenameTopic(menuTarget);
+                setMenuTarget(null);
+              }}
+            >
+              <Text style={styles.actionOptionText}>Rename</Text>
+            </TouchableOpacity>
+            <View style={styles.actionDivider} />
+            <TouchableOpacity
+              style={styles.actionOption}
+              onPress={() => {
+                setDeleteConfirm(menuTarget);
+                setMenuTarget(null);
+              }}
+            >
+              <Text style={[styles.actionOptionText, { color: colors.error }]}>Delete</Text>
+            </TouchableOpacity>
+            <View style={styles.actionDivider} />
+            <TouchableOpacity style={styles.actionOption} onPress={() => setMenuTarget(null)}>
+              <Text style={[styles.actionOptionText, { color: colors.textSecondary }]}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       )}
     </View>
   );
@@ -279,5 +321,46 @@ const styles = StyleSheet.create({
     ...typography.body,
     color: '#FFFFFF',
     fontWeight: '600',
+  },
+  actionOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  actionBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  actionCard: {
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+    width: '80%',
+    maxWidth: 320,
+    overflow: 'hidden',
+  },
+  actionOption: {
+    paddingVertical: 16,
+    paddingHorizontal: spacing.md,
+    alignItems: 'center',
+  },
+  actionOptionText: {
+    ...typography.body,
+    fontWeight: '600',
+    color: colors.textPrimary,
+  },
+  actionDivider: {
+    height: 1,
+    backgroundColor: colors.cardBorder,
   },
 });

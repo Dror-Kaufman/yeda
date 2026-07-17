@@ -6,7 +6,6 @@ import {
   StyleSheet,
   ActivityIndicator,
   FlatList,
-  Alert,
   Platform,
 } from 'react-native';
 import { supabase } from '../../../utils/supabase';
@@ -19,6 +18,7 @@ export default function AdminApprovalsScreen() {
   const [pending, setPending] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     loadPending();
@@ -49,8 +49,9 @@ export default function AdminApprovalsScreen() {
       .eq('id', userId);
 
     if (error) {
-      Alert.alert('Error', error.message);
+      setErrorMsg(error.message);
     } else {
+      setErrorMsg(null);
       setPending((prev) => prev.filter((p) => p.id !== userId));
     }
     setProcessing(null);
@@ -97,6 +98,9 @@ export default function AdminApprovalsScreen() {
                 </View>
               </View>
               <Text style={styles.email}>{item.id}</Text>
+              {errorMsg && (
+                <Text style={styles.errorMsg}>{errorMsg}</Text>
+              )}
               <View style={styles.actions}>
                 <TouchableOpacity
                   style={[styles.actionBtn, styles.approveBtn]}
@@ -214,5 +218,10 @@ const styles = StyleSheet.create({
   errorText: {
     ...typography.body,
     color: colors.error,
+  },
+  errorMsg: {
+    ...typography.caption,
+    color: colors.error,
+    marginBottom: spacing.sm,
   },
 });

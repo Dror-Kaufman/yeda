@@ -177,6 +177,13 @@ export default function ExamIntroScreen() {
             >
               <Text style={styles.startButtonText}>Start Exam</Text>
             </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.historyLink}
+              onPress={() => router.push(`/topic/${topicId}/exam/history`)}
+            >
+              <Text style={styles.historyLinkText}>View Past Results</Text>
+            </TouchableOpacity>
           </>
         )}
       </ScrollView>
@@ -277,5 +284,15 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '600',
     fontSize: 16,
+  },
+  historyLink: {
+    alignItems: 'center',
+    marginTop: spacing.lg,
+    paddingVertical: spacing.sm,
+  },
+  historyLinkText: {
+    ...typography.body,
+    color: colors.textTertiary,
+    textDecorationLine: 'underline',
   },
 });

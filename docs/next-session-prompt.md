@@ -1,6 +1,6 @@
-Read `docs/session-20260716-scaffold.md`, `docs/session-20260716-auth.md`, `docs/session-20260717-content-management.md`, `docs/session-20260717-mcq-pipeline.md`, `docs/session-20260717-wave4.md`, and `docs/requirements.md` first.
+Read `docs/session-20260716-scaffold.md`, `docs/session-20260716-auth.md`, `docs/session-20260717-content-management.md`, `docs/session-20260717-mcq-pipeline.md`, `docs/session-20260717-wave4.md`, `docs/session-20260717-wave4-complete.md`, and `docs/requirements.md` first.
 
-**Wave 4 is complete.** The project now has all 4 learning modes:
+**Wave 4 is complete.** All 4 learning modes plus all gap items done:
 
 | Mode | Status | Details |
 |------|--------|---------|
@@ -18,34 +18,32 @@ Read `docs/session-20260716-scaffold.md`, `docs/session-20260716-auth.md`, `docs
 - **Exercise mode**: count picker → questions with hints/explanations
 - **Exam mode**: count + time picker → timed session → score + review
 - **Study mode**: material list → Google Docs iframe viewer
+- **Add Material screen**: teacher form to add study materials per topic
+- **Inline confirmation dialogs**: `ConfirmDialog` component replacing `Alert.alert` everywhere
+- **Exam history**: past attempt list with expandable question review
 - **LaTeX rendering**: `<LatexText>` component parsing $...$ / $$...$$ via KaTeX
 - 25 Jest unit tests — all passing
-- 12 Playwright E2E tests — all passing (1 pre-existing flaky: content-crud cancel dialog)
-- 3 seed users: admin/teacher/student@yeda.com (password123), student is `pending_approval`
+- 14 Playwright E2E tests — all passing, all self-cleaning
+- 5 seed users: admin/teacher/student/unapproved_student@yeda.com (password123)
 
-### Suggested Next Steps
+### Suggested Next Steps (Phase 2)
 
-**Polish / Gap Items:**
-1. **Add Material screen** — teacher UI to add study materials (title + Google Docs URL) per topic. Currently the "Add Material" button shows "Coming in Wave 4".
-2. **E2E tests for Exercise/Exam/Study modes** — the new screens have no Playwright coverage. Test navigation, question answering, timer behavior, and results display.
-3. **Replace `Alert.alert` with inline UI** — `Alert.alert` is a silent no-op on react-native-web. The delete confirmations in grades/subjects/topics screens are broken. Use inline confirmation state instead.
-4. **Exam results history** — list past exam attempts per topic so students can review their history.
-
-**Phase 2 items (next major wave):**
-5. **Add Material screen** — teachers upload study materials (Google Docs URL + title + description)
-6. **Google OAuth** — add social login option
-7. **Full progress tracking** — per-question history, progress bars per topic
-8. **AI-powered MCQ generation** — generate questions from raw text uploads
-9. **Hebrew / RTL support**
-10. **File manager enhancements** — drag-drop, search, grid/list view
+1. **Google OAuth** — add social login option alongside email/password
+2. **Full progress tracking** — per-question history, progress bars per topic
+3. **AI-powered MCQ generation** — generate questions from raw text uploads
+4. **Hebrew / RTL support** — full right-to-left layout for Hebrew users
+5. **File manager enhancements** — drag-drop, search, grid/list view for study materials
 
 ### Keep In Mind
-- **`Alert.alert` is a silent no-op on web** — don't use it for any new UI. Use inline state-driven confirmation dialogs.
+- **`Alert.alert` is a silent no-op on web** — don't use it for any new UI. Use inline state-driven confirmation dialogs (`ConfirmDialog`).
 - **`Alert.prompt` is iOS-only** — use `showPrompt()` from `src/utils/prompt.ts`.
 - **No `dangerouslySetInnerHTML` prop on RN View** — use the ref-based `HtmlView` pattern from `LatexText.tsx` instead.
 - **CSS imports need type decl** — `declare module '*.css' {}` in a `.d.ts` file.
 - **Expo Router deep nested routes** — each nested route (e.g., `exercise/session`) must have its own `Stack.Screen` entry in the layout.
 - **Seed data subjects can get wiped** — re-run seed via docker exec if Browse Content shows empty.
+- **E2E tests must clean up after themselves** — use `afterAll` with `docker exec psql` or `SERVICE_ROLE_KEY`. See AGENTS.md for pattern.
+- **Service role key bypasses RLS** — use for test cleanup, especially `auth.users` which isn't exposed via REST API.
+- **Dedicated seed user for edge cases** — `unapproved_student@yeda.com` is the canonical pending-approval user; don't use `student@yeda.com` for that.
 
 ### To Start Dev Environment
 ```bash

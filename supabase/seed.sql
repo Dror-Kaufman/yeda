@@ -10,6 +10,7 @@ DECLARE
   admin_id UUID;
   teacher_id UUID;
   student_id UUID;
+  unapproved_student_id UUID;
 BEGIN
   -- Admin user
   INSERT INTO auth.users (
@@ -101,7 +102,37 @@ BEGIN
     'email', now(), now(), now()
   );
 
-  -- Approve admin + teacher (student stays pending_approval)
+  -- Unapproved student user (stays pending_approval)
+  INSERT INTO auth.users (
+    instance_id, id, aud, role, email, encrypted_password,
+    email_confirmed_at, confirmation_token, recovery_token,
+    email_change_token_current, email_change_token_new,
+    reauthentication_token,
+    email_change, phone_change, phone_change_token,
+    raw_app_meta_data, raw_user_meta_data,
+    created_at, updated_at
+  ) VALUES (
+    '00000000-0000-0000-0000-000000000000', gen_random_uuid(),
+    'authenticated', 'authenticated',
+    'unapproved_student@yeda.com',
+    crypt('password123', gen_salt('bf', 10)),
+    now(), '', '', '', '', '',
+    '', '', '',
+    jsonb_build_object('provider', 'email', 'providers', jsonb_build_array('email')),
+    jsonb_build_object('display_name', 'Unapproved Student', 'role', 'student'),
+    now(), now()
+  )
+  RETURNING id INTO unapproved_student_id;
+
+  INSERT INTO auth.identities (
+    id, provider_id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at
+  ) VALUES (
+    gen_random_uuid(), 'unapproved_student@yeda.com', unapproved_student_id,
+    jsonb_build_object('sub', unapproved_student_id, 'email', 'unapproved_student@yeda.com', 'email_verified', true, 'phone_verified', false),
+    'email', now(), now(), now()
+  );
+
+  -- Approve admin + teacher (students stay pending_approval)
   UPDATE public.profiles SET status = 'active'
   WHERE id IN (admin_id, teacher_id);
 END $$;

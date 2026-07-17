@@ -6,12 +6,12 @@ import {
   StyleSheet,
   ActivityIndicator,
   ScrollView,
-  Alert,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { supabase } from '../../../../../utils/supabase';
 import { colors, spacing, typography } from '../../../../../constants/theme';
 import { useSession } from '../../../../../utils/auth-context';
+import ConfirmDialog from '../../../../../components/ui/ConfirmDialog';
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -37,6 +37,7 @@ export default function ManageQuestionsScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<Question | null>(null);
 
   const canManage = profile?.role === 'teacher' || profile?.role === 'admin';
 
@@ -68,30 +69,24 @@ export default function ManageQuestionsScreen() {
   }, [topicId]);
 
   const handleDelete = (q: Question) => {
-    Alert.alert(
-      'Delete Question',
-      `Are you sure you want to delete this question?\n\n"${q.question_text.substring(0, 100)}${q.question_text.length > 100 ? '...' : ''}"`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            setDeleting(q.id);
-            const { error: delErr } = await supabase
-              .from('questions')
-              .delete()
-              .eq('id', q.id);
-            if (delErr) {
-              console.error('Failed to delete question:', delErr);
-            } else {
-              setQuestions((prev) => prev.filter((x) => x.id !== q.id));
-            }
-            setDeleting(null);
-          },
-        },
-      ],
-    );
+    setDeleteConfirm(q);
+  };
+
+  const confirmDeleteQuestion = async () => {
+    if (!deleteConfirm) return;
+    setDeleting(deleteConfirm.id);
+    const qId = deleteConfirm.id;
+    setDeleteConfirm(null);
+    const { error: delErr } = await supabase
+      .from('questions')
+      .delete()
+      .eq('id', qId);
+    if (delErr) {
+      console.error('Failed to delete question:', delErr);
+    } else {
+      setQuestions((prev) => prev.filter((x) => x.id !== qId));
+    }
+    setDeleting(null);
   };
 
   // ── Loading / Error ──────────────────────────────────────────────
@@ -224,6 +219,19 @@ export default function ManageQuestionsScreen() {
           </View>
         )}
       </ScrollView>
+
+      <ConfirmDialog
+        visible={deleteConfirm !== null}
+        title="Delete Question"
+        message={
+          deleteConfirm
+            ? `Are you sure you want to delete this question?\n\n"${deleteConfirm.question_text.substring(0, 100)}${deleteConfirm.question_text.length > 100 ? '...' : ''}"`
+            : ''
+        }
+        onCancel={() => setDeleteConfirm(null)}
+        onConfirm={confirmDeleteQuestion}
+        loading={deleting !== null}
+      />
     </View>
   );
 }
