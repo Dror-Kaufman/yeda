@@ -23,6 +23,9 @@ export default function AppLayout() {
       <Stack.Screen name="index" />
       <Stack.Screen name="admin/approvals" />
       <Stack.Screen name="teacher/pending" />
+      <Stack.Screen name="grades" />
+      <Stack.Screen name="topics/[subjectId]" />
+      <Stack.Screen name="topic/[topicId]" />
     </Stack>
   );
 }

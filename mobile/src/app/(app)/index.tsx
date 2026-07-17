@@ -19,6 +19,16 @@ export default function HomeScreen() {
       </Text>
 
       <View style={styles.card}>
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => router.push('/(app)/grades')}
+        >
+          <Text style={styles.menuText}>Browse Content</Text>
+          <Text style={styles.menuArrow}>›</Text>
+        </TouchableOpacity>
+
+        <View style={styles.separator} />
+
         {profile?.role === 'admin' && (
           <TouchableOpacity
             style={styles.menuItem}
@@ -90,6 +100,10 @@ const styles = StyleSheet.create({
   menuArrow: {
     fontSize: 24,
     color: colors.textTertiary,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: colors.cardBorder,
   },
   signOutButton: {
     marginTop: spacing.xl,

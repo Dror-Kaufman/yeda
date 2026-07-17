@@ -112,7 +112,8 @@ END $$;
 INSERT INTO public.grades (name, display_order) VALUES
   ('10th Grade', 1),
   ('11th Grade', 2),
-  ('12th Grade', 3);
+  ('12th Grade', 3)
+ON CONFLICT ON CONSTRAINT grades_name_unique DO NOTHING;
 
 -- ============================================================
 -- Sample content data (subjects, topics, questions, materials)

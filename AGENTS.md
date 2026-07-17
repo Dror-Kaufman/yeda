@@ -145,6 +145,16 @@ The safest approach: wrap everything in a `DO $$ ... END $$` block to capture ge
 - **`sessionReady` ref**: When using `Stack.Protected`, the layout needs a ref-based guard to prevent the sign-in redirect from firing before the profile fetch completes. See `auth-context.tsx` for the pattern.
 - **E2E approval test targeting**: When many pending users exist, clicking the first "Approve" won't make "No pending approvals" appear. Use the user's UUID from the API signup response to target the specific user.
 
+## React Native + Web Gotchas
+- **`Alert.prompt` is iOS-only**: Does not exist on Android or react-native-web. Use `showPrompt()` utility in `src/utils/prompt.ts` which wraps `window.prompt` in `setTimeout(0)` for cross-platform compatibility.
+- **Playwright has no `page.prompt()`**: Mock prompt dialogs via `page.evaluate(() => window.prompt = () => 'text')` before triggering the prompt action.
+- **`jest.spyOn(Platform, 'OS', 'get')` fails in Node env**: `Platform.OS` is a plain string, not a getter, in Node environment. Use `Object.defineProperty(Platform, 'OS', { get: () => 'web', configurable: true })` instead.
+- **`jest-expo` + jsdom conflict**: RN preset's setup.js redefines `window`, conflicting with `@jest-environment jsdom`. Don't use jsdom with jest-expo; mock globals manually via `Object.defineProperty(globalThis, 'window', ...)`.
+
+## Content Management Gotchas
+- **Grades need UNIQUE constraint + dedup**: Before adding `UNIQUE(name)` to grades, clean any duplicate rows from seed data or the migration will fail.
+- **`supabase stop && start` doesn't re-apply migrations**: Not just for `ALTER TYPE` — also for policy changes. Always use `docker exec` for live DB changes.
+
 ## Supabase Realtime
 - Channel names must be unique per subscription. Use dynamic names: `` `events-${Date.now()}-${Math.random()}` `` and track with `useRef` for cleanup.
 - Never hardcode channel names — `channel()` returns the already-subscribed one if the name matches.
@@ -176,6 +186,7 @@ When the user says "wrap up" (or equivalent), do the following:
 | E2E tests (auth) | `PLAYWRIGHT_HOST_PLATFORM_OVERRIDE=ubuntu24.04-x64 npx playwright test --config=playwright.config.ts` (from `mobile/`) |
 | Check auth logs | `docker logs supabase_auth_yeda --tail 20` |
 | ALTER TYPE enum | `docker exec -i supabase_db_yeda psql -U postgres -d postgres -c "ALTER TYPE <enum> ADD VALUE '<value>';"` |
+| Run unit tests | `npm test` (from `mobile/`) |
 | Install deps | `npm install <pkg> --legacy-peer-deps` from `mobile/` |
 
 ## Testing Workflow
