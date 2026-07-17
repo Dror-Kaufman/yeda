@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
+import { useSafeBack } from '../../../../../utils/useSafeBack';
 import { supabase } from '../../../../../utils/supabase';
 import { colors, spacing, typography } from '../../../../../constants/theme';
 
@@ -17,6 +18,7 @@ export default function StudyMaterialViewScreen() {
     topicId: string;
     materialId: string;
   }>();
+  const goBack = useSafeBack(`/topic/${topicId}/study`);
   const [title, setTitle] = useState<string | null>(null);
   const [googleDocsUrl, setGoogleDocsUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -65,7 +67,7 @@ export default function StudyMaterialViewScreen() {
         </Text>
         <TouchableOpacity
           style={styles.retryButton}
-          onPress={() => router.back()}
+          onPress={goBack}
         >
           <Text style={styles.retryButtonText}>Go Back</Text>
         </TouchableOpacity>
@@ -77,7 +79,7 @@ export default function StudyMaterialViewScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={goBack}>
           <Text style={styles.backText}>{'\u2190'} Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle} numberOfLines={1}>

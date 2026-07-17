@@ -9,6 +9,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
+import { useSafeBack } from '../../../../../utils/useSafeBack';
 import { supabase } from '../../../../../utils/supabase';
 import { useSession } from '../../../../../utils/auth-context';
 import { colors, spacing, typography } from '../../../../../constants/theme';
@@ -29,6 +30,7 @@ function validateUrl(url: string): boolean {
 export default function AddMaterialScreen() {
   const { topicId } = useLocalSearchParams<{ topicId: string }>();
   const { session } = useSession();
+  const goBack = useSafeBack(`/topic/${topicId}`);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -81,7 +83,7 @@ export default function AddMaterialScreen() {
       return;
     }
 
-    router.back();
+    goBack();
   }
 
   // ── Render ────────────────────────────────────────────────────────
@@ -93,7 +95,7 @@ export default function AddMaterialScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={goBack}
           style={styles.backButton}
         >
           <Text style={styles.backText}>{'\u2190'} Back</Text>

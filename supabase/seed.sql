@@ -224,7 +224,7 @@ BEGIN
       v_quadratic_id,
       'Quadratic Equations Study Guide',
       'Comprehensive guide covering factoring, completing the square, and the quadratic formula.',
-      'https://docs.google.com/document/d/example-quadratic-equations/edit',
+      'https://docs.google.com/document/d/1-WFNi11Zu-2Gt2sU6EpM9C3-JzWrJz21JN68oWyk-WQ/edit?usp=sharing',
       v_teacher_id
     );
 END $$;

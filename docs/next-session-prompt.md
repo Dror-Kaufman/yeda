@@ -1,4 +1,4 @@
-Read `docs/session-20260716-scaffold.md`, `docs/session-20260716-auth.md`, `docs/session-20260717-content-management.md`, `docs/session-20260717-mcq-pipeline.md`, `docs/session-20260717-wave4.md`, `docs/session-20260717-wave4-complete.md`, and `docs/requirements.md` first.
+Read `docs/session-20260716-scaffold.md`, `docs/session-20260716-auth.md`, `docs/session-20260717-content-management.md`, `docs/session-20260717-mcq-pipeline.md`, `docs/session-20260717-wave4.md`, `docs/session-20260717-wave4-complete.md`, `docs/session-20260717-back-navigation.md`, and `docs/requirements.md` first.
 
 **Wave 4 is complete.** All 4 learning modes plus all gap items done:
 
@@ -41,6 +41,7 @@ Read `docs/session-20260716-scaffold.md`, `docs/session-20260716-auth.md`, `docs
 - **CSS imports need type decl** — `declare module '*.css' {}` in a `.d.ts` file.
 - **Expo Router deep nested routes** — each nested route (e.g., `exercise/session`) must have its own `Stack.Screen` entry in the layout.
 - **Seed data subjects can get wiped** — re-run seed via docker exec if Browse Content shows empty.
+- **Safe back navigation** — All back buttons use `useSafeBack(fallback)` from `src/utils/useSafeBack.ts` instead of bare `router.back()`. For any new screen with a back button, import and use `useSafeBack` with an appropriate fallback route.
 - **E2E tests must clean up after themselves** — use `afterAll` with `docker exec psql` or `SERVICE_ROLE_KEY`. See AGENTS.md for pattern.
 - **Service role key bypasses RLS** — use for test cleanup, especially `auth.users` which isn't exposed via REST API.
 - **Dedicated seed user for edge cases** — `unapproved_student@yeda.com` is the canonical pending-approval user; don't use `student@yeda.com` for that.

@@ -164,6 +164,7 @@ The safest approach: wrap everything in a `DO $$ ... END $$` block to capture ge
 
 ## Expo Router Gotchas (added 2026-07-17)
 - **Deep nested routes need explicit Stack.Screen entries**: Both `topic/[topicId]/exercise` AND `topic/[topicId]/exercise/session` must each be registered in the layout's `<Stack>`. Omitting the intermediate parent route causes navigation failures.
+- **Back buttons must use `useSafeBack(fallback)`**: Never use bare `router.back()` — it crashes with "GO_BACK was not handled by any navigator" when the screen is the first in the stack. Import `useSafeBack` from `src/utils/useSafeBack.ts` and pass a fallback route (e.g., `useSafeBack('/topic/${topicId}')`). The hook checks `router.canGoBack()` first, then falls back to `router.dismissTo(fallback)`.
 
 ## npm Gotchas
 - **Installing packages can break jest-expo**: `npm install <pkg>` can remove `@react-native/jest-preset` from node_modules. Fix with: `npm install --save-dev @react-native/jest-preset --legacy-peer-deps`.

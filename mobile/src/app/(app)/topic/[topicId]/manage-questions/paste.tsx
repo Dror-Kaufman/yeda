@@ -11,6 +11,7 @@ import {
   Platform,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
+import { useSafeBack } from '../../../../../utils/useSafeBack';
 import { supabase } from '../../../../../utils/supabase';
 import { colors, spacing, typography } from '../../../../../constants/theme';
 import {
@@ -36,6 +37,7 @@ type ValidationIssue = {
 
 export default function PasteMCQScreen() {
   const { topicId } = useLocalSearchParams<{ topicId: string }>();
+  const goBack = useSafeBack(`/topic/${topicId}/manage-questions`);
 
   const [jsonInput, setJsonInput] = useState('');
   const [parsedQuestions, setParsedQuestions] = useState<ParsedQuestion[]>([]);
@@ -170,7 +172,7 @@ export default function PasteMCQScreen() {
     }
 
     // Published successfully — navigate back
-    router.back();
+    goBack();
   };
 
   // ── Render ─────────────────────────────────────────────────────────
@@ -188,7 +190,7 @@ export default function PasteMCQScreen() {
           keyboardShouldPersistTaps="handled"
         >
           {/* Back */}
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity onPress={goBack} style={styles.backButton}>
             <Text style={styles.backText}>{'\u2190'} Back</Text>
           </TouchableOpacity>
 

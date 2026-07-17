@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
+import { useSafeBack } from '../../../../../utils/useSafeBack';
 import { supabase } from '../../../../../utils/supabase';
 import { useSession } from '../../../../../utils/auth-context';
 import { colors, spacing, typography } from '../../../../../constants/theme';
@@ -60,6 +61,7 @@ export default function ExamSessionScreen() {
     time: string;
   }>();
   const { session: authSession } = useSession();
+  const goBack = useSafeBack(`/topic/${topicId}`);
 
   const questionCount = Math.min(parseInt(count ?? '10', 10) || 10, 200);
   const timeLimitMinutes = parseInt(time ?? '10', 10) || 10;
@@ -218,21 +220,21 @@ export default function ExamSessionScreen() {
         <Text style={styles.errorText}>{error}</Text>
         <TouchableOpacity
           style={styles.retryButton}
-          onPress={() => router.back()}
-        >
-          <Text style={styles.retryButtonText}>Go Back</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+onPress={goBack}
+          >
+            <Text style={styles.retryButtonText}>Go Back</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
 
-  if (!currentQuestion) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.errorText}>No questions found.</Text>
-        <TouchableOpacity
-          style={styles.retryButton}
-          onPress={() => router.back()}
+    if (!currentQuestion) {
+      return (
+        <View style={styles.centered}>
+          <Text style={styles.errorText}>No questions found.</Text>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={goBack}
         >
           <Text style={styles.retryButtonText}>Go Back</Text>
         </TouchableOpacity>
@@ -325,7 +327,7 @@ export default function ExamSessionScreen() {
 
           <TouchableOpacity
             style={styles.backToTopicButton}
-            onPress={() => router.back()}
+            onPress={goBack}
           >
             <Text style={styles.backToTopicButtonText}>
               Back to Topic

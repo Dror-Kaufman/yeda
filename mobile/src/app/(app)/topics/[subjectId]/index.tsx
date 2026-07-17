@@ -9,6 +9,7 @@ import {
   Pressable,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
+import { useSafeBack } from '../../../../utils/useSafeBack';
 import { supabase } from '../../../../utils/supabase';
 import { colors, spacing, typography } from '../../../../constants/theme';
 import { useSession } from '../../../../utils/auth-context';
@@ -27,6 +28,7 @@ export default function TopicListScreen() {
   const { subjectId } = useLocalSearchParams<{ subjectId: string }>();
   const { profile, session } = useSession();
   const canManage = profile?.role === 'admin' || profile?.role === 'teacher';
+  const goBack = useSafeBack('/(app)');
 
   const [subjectName, setSubjectName] = useState('');
   const [gradeName, setGradeName] = useState('');
@@ -158,7 +160,7 @@ export default function TopicListScreen() {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+      <TouchableOpacity style={styles.backButton} onPress={goBack}>
         <Text style={styles.backText}>Back</Text>
       </TouchableOpacity>
 

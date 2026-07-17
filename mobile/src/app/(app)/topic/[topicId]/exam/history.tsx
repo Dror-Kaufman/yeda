@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
+import { useSafeBack } from '../../../../../utils/useSafeBack';
 import { supabase } from '../../../../../utils/supabase';
 import { useSession } from '../../../../../utils/auth-context';
 import { colors, spacing, typography } from '../../../../../constants/theme';
@@ -37,6 +38,7 @@ interface ExamAttempt {
 
 export default function ExamHistoryScreen() {
   const { topicId } = useLocalSearchParams<{ topicId: string }>();
+  const goBack = useSafeBack(`/topic/${topicId}/exam`);
   const { session } = useSession();
 
   const [attempts, setAttempts] = useState<ExamAttempt[]>([]);
@@ -111,10 +113,10 @@ export default function ExamHistoryScreen() {
         <Text style={styles.errorText}>{error}</Text>
         <TouchableOpacity
           style={styles.retryButton}
-          onPress={() => router.back()}
-        >
-          <Text style={styles.retryButtonText}>Go Back</Text>
-        </TouchableOpacity>
+onPress={goBack}
+          >
+            <Text style={styles.retryButtonText}>Go Back</Text>
+          </TouchableOpacity>
       </View>
     );
   }
@@ -125,7 +127,7 @@ export default function ExamHistoryScreen() {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Back button */}
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={goBack} style={styles.backButton}>
           <Text style={styles.backText}>{'\u2190'} Back</Text>
         </TouchableOpacity>
 

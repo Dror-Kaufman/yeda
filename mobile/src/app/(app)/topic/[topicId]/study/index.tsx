@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
+import { useSafeBack } from '../../../../../utils/useSafeBack';
 import { supabase } from '../../../../../utils/supabase';
 import { colors, spacing, typography } from '../../../../../constants/theme';
 
@@ -24,6 +25,7 @@ interface StudyMaterial {
 
 export default function StudyMaterialsScreen() {
   const { topicId } = useLocalSearchParams<{ topicId: string }>();
+  const goBack = useSafeBack(`/topic/${topicId}`);
   const [topicName, setTopicName] = useState<string | null>(null);
   const [materials, setMaterials] = useState<StudyMaterial[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,9 +82,9 @@ export default function StudyMaterialsScreen() {
         <Text style={styles.errorText}>{error}</Text>
         <TouchableOpacity
           style={styles.retryButton}
-          onPress={() => router.back()}
-        >
-          <Text style={styles.retryButtonText}>Go Back</Text>
+onPress={goBack}
+          >
+            <Text style={styles.retryButtonText}>Go Back</Text>
         </TouchableOpacity>
       </View>
     );
@@ -92,7 +94,7 @@ export default function StudyMaterialsScreen() {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={goBack}
           style={styles.backButton}
         >
           <Text style={styles.backText}>{'\u2190'} Back</Text>

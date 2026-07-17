@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
+import { useSafeBack } from '../../../../utils/useSafeBack';
 import { supabase } from '../../../../utils/supabase';
 import { useSession } from '../../../../utils/auth-context';
 import { colors, spacing, typography } from '../../../../constants/theme';
@@ -43,6 +44,7 @@ interface StudyMaterial {
 
 export default function TopicDetailScreen() {
   const { topicId } = useLocalSearchParams<{ topicId: string }>();
+  const goBack = useSafeBack('/(app)');
   const { profile } = useSession();
 
   const [topic, setTopic] = useState<TopicData | null>(null);
@@ -131,7 +133,7 @@ export default function TopicDetailScreen() {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Back Button */}
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={goBack} style={styles.backButton}>
           <Text style={styles.backText}>{'\u2190'} Back</Text>
         </TouchableOpacity>
 

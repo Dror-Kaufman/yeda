@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
+import { useSafeBack } from '../../../../../utils/useSafeBack';
 import { supabase } from '../../../../../utils/supabase';
 import { colors, spacing, typography } from '../../../../../constants/theme';
 import { useSession } from '../../../../../utils/auth-context';
@@ -30,6 +31,7 @@ interface Question {
 
 export default function ManageQuestionsScreen() {
   const { topicId } = useLocalSearchParams<{ topicId: string }>();
+  const goBack = useSafeBack(`/topic/${topicId}`);
   const { profile } = useSession();
 
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -120,7 +122,7 @@ export default function ManageQuestionsScreen() {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Back */}
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={goBack} style={styles.backButton}>
           <Text style={styles.backText}>{'\u2190'} Back</Text>
         </TouchableOpacity>
 

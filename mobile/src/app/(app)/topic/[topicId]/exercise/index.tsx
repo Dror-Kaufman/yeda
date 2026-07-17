@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
+import { useSafeBack } from '../../../../../utils/useSafeBack';
 import { supabase } from '../../../../../utils/supabase';
 import { colors, spacing, typography } from '../../../../../constants/theme';
 
@@ -22,6 +23,7 @@ const COUNT_OPTIONS: { label: string; value: CountOption }[] = [
 
 export default function ExerciseIntroScreen() {
   const { topicId } = useLocalSearchParams<{ topicId: string }>();
+  const goBack = useSafeBack(`/topic/${topicId}`);
   const [topicName, setTopicName] = useState<string | null>(null);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -77,7 +79,7 @@ export default function ExerciseIntroScreen() {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={goBack}
           style={styles.backButton}
         >
           <Text style={styles.backText}>{'\u2190'} Back</Text>

@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
+import { useSafeBack } from '../../../../../utils/useSafeBack';
 import { supabase } from '../../../../../utils/supabase';
 import { colors, spacing, typography } from '../../../../../constants/theme';
 
@@ -49,6 +50,7 @@ export default function ExerciseSessionScreen() {
     topicId: string;
     count: string;
   }>();
+  const goBack = useSafeBack(`/topic/${topicId}/exercise`);
   const questionCount = Math.min(parseInt(count ?? '10', 10) || 10, 200);
 
   const [questions, setQuestions] = useState<ExerciseQuestion[]>([]);
@@ -158,11 +160,11 @@ export default function ExerciseSessionScreen() {
 
   const handleNext = useCallback(() => {
     if (isLastQuestion) {
-      router.back();
+      goBack();
     } else {
       setCurrentIndex((i) => i + 1);
     }
-  }, [isLastQuestion]);
+  }, [isLastQuestion, goBack]);
 
   // ── Loading / Error / Empty ──────────────────────────────────────
 
@@ -180,7 +182,7 @@ export default function ExerciseSessionScreen() {
         <Text style={styles.errorText}>{error}</Text>
         <TouchableOpacity
           style={styles.retryButton}
-          onPress={() => router.back()}
+          onPress={goBack}
         >
           <Text style={styles.retryButtonText}>Go Back</Text>
         </TouchableOpacity>
@@ -194,7 +196,7 @@ export default function ExerciseSessionScreen() {
         <Text style={styles.errorText}>No questions found.</Text>
         <TouchableOpacity
           style={styles.retryButton}
-          onPress={() => router.back()}
+          onPress={goBack}
         >
           <Text style={styles.retryButtonText}>Go Back</Text>
         </TouchableOpacity>
@@ -248,7 +250,7 @@ export default function ExerciseSessionScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Back button */}
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={goBack}
           style={styles.backButton}
         >
           <Text style={styles.backText}>{'\u2190'} Exit</Text>
