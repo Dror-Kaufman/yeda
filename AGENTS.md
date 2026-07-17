@@ -154,6 +154,11 @@ The safest approach: wrap everything in a `DO $$ ... END $$` block to capture ge
 ## Content Management Gotchas
 - **Grades need UNIQUE constraint + dedup**: Before adding `UNIQUE(name)` to grades, clean any duplicate rows from seed data or the migration will fail.
 - **`supabase stop && start` doesn't re-apply migrations**: Not just for `ALTER TYPE` — also for policy changes. Always use `docker exec` for live DB changes.
+- **Seed data subjects can get wiped**: If Browse Content shows no subjects under a grade, re-insert via `docker exec` using seed.sql's content block.
+
+## Web Platform Gotchas
+- **`Alert.alert` is a silent no-op on react-native-web**: It shows nothing and callbacks never fire. Use inline state-driven UI for errors/confirmations instead. This affects ALL delete confirmations in the existing codebase too.
+- **`Alert.prompt` is iOS-only**: Already documented, but worth repeating — crashes on web and Android. Use `showPrompt()` from `src/utils/prompt.ts` instead.
 
 ## Supabase Realtime
 - Channel names must be unique per subscription. Use dynamic names: `` `events-${Date.now()}-${Math.random()}` `` and track with `useRef` for cleanup.

@@ -212,7 +212,7 @@ export default function TopicDetailScreen() {
           <View style={styles.section}>
             <TouchableOpacity
               style={styles.primaryButton}
-              onPress={() => Alert.alert('Coming in Wave 4')}
+              onPress={() => router.push(`/topic/${topicId}/manage-questions`)}
             >
               <Text style={styles.primaryButtonText}>Manage Questions</Text>
             </TouchableOpacity>
