@@ -53,14 +53,14 @@ export default function SignInScreen() {
         <Text style={styles.title}>Sign In</Text>
         <Text style={styles.subtitle}>Welcome back to Yeda</Text>
 
-        {alreadySignedUp && (
+        {error ? (
+          <Text style={styles.error}>{error}</Text>
+        ) : alreadySignedUp ? (
           <Text style={styles.pendingMessage}>
             Your account is pending approval. You will be able to sign in once
             approved.
           </Text>
-        )}
-
-        {error && <Text style={styles.error}>{error}</Text>}
+        ) : null}
 
         <TextInput
           style={styles.input}

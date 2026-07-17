@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { SessionProvider, useSession } from '../utils/auth-context';
 import { colors } from '../constants/theme';
+import 'katex/dist/katex.min.css';
 
 function SplashScreen() {
   return (

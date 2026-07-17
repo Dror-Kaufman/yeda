@@ -26,6 +26,12 @@ export default function AppLayout() {
       <Stack.Screen name="grades" />
       <Stack.Screen name="topics/[subjectId]" />
       <Stack.Screen name="topic/[topicId]" />
+      <Stack.Screen name="topic/[topicId]/exercise" />
+      <Stack.Screen name="topic/[topicId]/exercise/session" />
+      <Stack.Screen name="topic/[topicId]/study" />
+      <Stack.Screen name="topic/[topicId]/study/view" />
+      <Stack.Screen name="topic/[topicId]/exam" />
+      <Stack.Screen name="topic/[topicId]/exam/session" />
       <Stack.Screen name="topic/[topicId]/manage-questions" />
       <Stack.Screen name="topic/[topicId]/manage-questions/paste" />
     </Stack>

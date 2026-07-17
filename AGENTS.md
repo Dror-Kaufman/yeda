@@ -159,6 +159,14 @@ The safest approach: wrap everything in a `DO $$ ... END $$` block to capture ge
 ## Web Platform Gotchas
 - **`Alert.alert` is a silent no-op on react-native-web**: It shows nothing and callbacks never fire. Use inline state-driven UI for errors/confirmations instead. This affects ALL delete confirmations in the existing codebase too.
 - **`Alert.prompt` is iOS-only**: Already documented, but worth repeating — crashes on web and Android. Use `showPrompt()` from `src/utils/prompt.ts` instead.
+- **`dangerouslySetInnerHTML` not in RN View TypeScript types**: Even though react-native-web supports it at runtime, the React Native types don't include it. Use a ref-based approach: `const ref = useRef<View>(null); useEffect(() => { (ref.current as any).innerHTML = html; }, [html]); return <View ref={ref} />;`. See `src/components/LatexText.tsx` for a working example.
+- **CSS side-effect imports need type declaration**: Importing CSS files like `import 'katex/dist/katex.min.css'` requires `declare module '*.css' {}` in a `.d.ts` file (see `src/global.d.ts`).
+
+## Expo Router Gotchas (added 2026-07-17)
+- **Deep nested routes need explicit Stack.Screen entries**: Both `topic/[topicId]/exercise` AND `topic/[topicId]/exercise/session` must each be registered in the layout's `<Stack>`. Omitting the intermediate parent route causes navigation failures.
+
+## npm Gotchas
+- **Installing packages can break jest-expo**: `npm install <pkg>` can remove `@react-native/jest-preset` from node_modules. Fix with: `npm install --save-dev @react-native/jest-preset --legacy-peer-deps`.
 
 ## Supabase Realtime
 - Channel names must be unique per subscription. Use dynamic names: `` `events-${Date.now()}-${Math.random()}` `` and track with `useRef` for cleanup.

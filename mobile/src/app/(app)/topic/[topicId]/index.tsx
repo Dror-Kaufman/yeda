@@ -182,21 +182,21 @@ export default function TopicDetailScreen() {
 
             <TouchableOpacity
               style={styles.outlinedButton}
-              onPress={() => Alert.alert('Coming in Wave 4')}
+              onPress={() => router.push(`/topic/${topicId}/study`)}
             >
               <Text style={styles.outlinedButtonText}>Study Mode</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[styles.primaryButton, styles.modeButtonSpacing]}
-              onPress={() => Alert.alert('Coming in Wave 4')}
+              onPress={() => router.push(`/topic/${topicId}/exercise`)}
             >
               <Text style={styles.primaryButtonText}>Exercise Mode</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[styles.outlinedButton, styles.modeButtonSpacing]}
-              onPress={() => Alert.alert('Coming in Wave 4')}
+              onPress={() => router.push(`/topic/${topicId}/exam`)}
             >
               <Text style={styles.outlinedButtonText}>Exam Mode</Text>
             </TouchableOpacity>
