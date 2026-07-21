@@ -21,8 +21,13 @@ interface Grade {
   display_order: number;
 }
 
+interface GradeWithSubjects extends Grade {
+  subjects: { count: number }[];
+}
+
 export default function GradeListScreen() {
   const [grades, setGrades] = useState<Grade[]>([]);
+  const [subjectCounts, setSubjectCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<Grade | null>(null);
@@ -34,13 +39,19 @@ export default function GradeListScreen() {
   async function fetchGrades() {
     const { data, error: fetchError } = await supabase
       .from('grades')
-      .select('*')
+      .select('*, subjects(count)')
       .order('display_order');
 
     if (fetchError) {
       setError(fetchError.message);
     } else {
-      setGrades(data ?? []);
+      const gradesData = (data ?? []) as GradeWithSubjects[];
+      setGrades(gradesData);
+      const counts: Record<string, number> = {};
+      for (const grade of gradesData) {
+        counts[grade.id] = grade.subjects[0]?.count ?? 0;
+      }
+      setSubjectCounts(counts);
     }
   }
 
@@ -147,7 +158,12 @@ export default function GradeListScreen() {
             onPress={() => router.push(`/grades/${grade.id}`)}
             onLongPress={() => handleLongPress(grade)}
           >
-            <Text style={styles.cardText}>{grade.name}</Text>
+            <View style={styles.cardContent}>
+              <Text style={styles.cardText}>{grade.name}</Text>
+              <Text style={styles.metaText}>
+                Subjects: {subjectCounts[grade.id] ?? 0}
+              </Text>
+            </View>
             <Text style={styles.cardArrow}>›</Text>
           </TouchableOpacity>
         ))}
@@ -242,9 +258,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: 16,
   },
+  cardContent: {
+    flex: 1,
+  },
   cardText: {
     ...typography.body,
     color: colors.textPrimary,
+    marginBottom: spacing.xs,
+  },
+  metaText: {
+    ...typography.caption,
+    color: colors.textSecondary,
   },
   cardArrow: {
     fontSize: 24,

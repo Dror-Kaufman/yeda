@@ -13,10 +13,15 @@ interface Subject {
   display_order: number;
 }
 
+interface SubjectWithTopics extends Subject {
+  topics: { count: number }[];
+}
+
 export default function SubjectListScreen() {
   const { gradeId } = useLocalSearchParams<{ gradeId: string }>();
   const [gradeName, setGradeName] = useState<string | null>(null);
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [topicCounts, setTopicCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<Subject | null>(null);
@@ -31,7 +36,7 @@ export default function SubjectListScreen() {
         supabase.from('grades').select('name').eq('id', gradeId).single(),
         supabase
           .from('subjects')
-          .select('*')
+          .select('*, topics(count)')
           .eq('grade_id', gradeId)
           .order('display_order'),
       ]);
@@ -40,7 +45,13 @@ export default function SubjectListScreen() {
       if (subjectsResult.error) throw subjectsResult.error;
 
       setGradeName(gradeResult.data.name);
-      setSubjects(subjectsResult.data ?? []);
+      const subjectsData = (subjectsResult.data ?? []) as SubjectWithTopics[];
+      setSubjects(subjectsData);
+      const counts: Record<string, number> = {};
+      for (const subject of subjectsData) {
+        counts[subject.id] = subject.topics[0]?.count ?? 0;
+      }
+      setTopicCounts(counts);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load subjects');
     } finally {
@@ -140,7 +151,12 @@ export default function SubjectListScreen() {
             onPress={() => router.push(`/topics/${subject.id}`)}
             onLongPress={() => handleLongPress(subject)}
           >
-            <Text style={styles.subjectName}>{subject.name}</Text>
+            <View style={styles.subjectContent}>
+              <Text style={styles.subjectName}>{subject.name}</Text>
+              <Text style={styles.subjectMeta}>
+                Topics: {topicCounts[subject.id] ?? 0}
+              </Text>
+            </View>
             <Text style={styles.chevron}>›</Text>
           </TouchableOpacity>
         ))}
@@ -227,9 +243,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: 16,
   },
+  subjectContent: {
+    flex: 1,
+  },
   subjectName: {
     ...typography.body,
     color: colors.textPrimary,
+    marginBottom: spacing.xs,
+  },
+  subjectMeta: {
+    ...typography.caption,
+    color: colors.textSecondary,
   },
   chevron: {
     fontSize: 24,
