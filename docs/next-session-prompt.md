@@ -1,6 +1,6 @@
-Read `docs/requirements.md`, `docs/session-20260717-wave4-complete.md`, and `docs/session-20260721-rls-tightening.md` first.
+Read `docs/requirements.md`, `docs/session-20260717-wave4-complete.md`, `docs/session-20260721-rls-tightening.md`, and `docs/session-20260724-back-button-consolidation.md` first.
 
-**Status**: Wave 4 complete + RLS tightened for content tables.
+**Status**: Wave 4 complete + RLS tightened + Back buttons consolidated.
 
 ### What's Built (cumulative)
 - Expo app scaffolded with Expo Router, Supabase client, auth context
@@ -34,6 +34,7 @@ Read `docs/requirements.md`, `docs/session-20260717-wave4-complete.md`, and `doc
 3. **AI-powered MCQ generation** — generate questions from raw text uploads
 4. **Hebrew / RTL support** — full right-to-left layout for Hebrew users
 5. **File manager enhancements** — drag-drop, search, grid/list view for study materials
+6. **Playwright worker tuning** — discussed increasing `--workers=4` for faster E2E runs (currently defaults to 2 on 4-core machine)
 
 ### Keep In Mind
 - **Alert.alert is a silent no-op on web** — don't use it. Use inline state-driven confirmation dialogs (ConfirmDialog).
@@ -42,7 +43,8 @@ Read `docs/requirements.md`, `docs/session-20260717-wave4-complete.md`, and `doc
 - **CSS imports need type decl** — declare module '*.css' {} in a .d.ts file.
 - **Expo Router deep nested routes** — each nested route must have its own Stack.Screen entry.
 - **Seed data subjects can get wiped** — re-run seed via docker exec if Browse Content shows empty.
-- **Safe back navigation** — All back buttons use useSafeBack(fallback) from src/utils/useSafeBack.ts.
+- **Safe back navigation** — All back buttons use useSafeBack(fallback) from src/utils/useSafeBack.ts. On web, uses `window.history.back()` (matching browser behavior). On native, uses `router.canGoBack()` + fallback.
+- **Back button appearance** — Standardized to `← Back` with Unicode arrow (`\u2190`), consistent across all screens. Homepage has no back button.
 - **E2E tests must clean up after themselves** — use afterAll with docker exec psql or SERVICE_ROLE_KEY.
 - **Service role key bypasses RLS** — use for test cleanup, especially auth.users.
 - **Dedicated seed user for edge cases** — unapproved_student@yeda.com is the canonical pending-approval user.

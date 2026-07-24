@@ -8,12 +8,14 @@ import {
   FlatList,
   Platform,
 } from 'react-native';
+import { useSafeBack } from '../../../utils/useSafeBack';
 import { supabase } from '../../../utils/supabase';
 import { useSession } from '../../../utils/auth-context';
 import type { Profile } from '../../../utils/auth-context';
 import { colors, spacing, typography } from '../../../constants/theme';
 
 export default function TeacherPendingScreen() {
+  const goBack = useSafeBack('/(app)');
   const { profile } = useSession();
   const [pending, setPending] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,6 +67,9 @@ export default function TeacherPendingScreen() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity style={styles.backButton} onPress={goBack}>
+        <Text style={styles.backText}>{'\u2190'} Back</Text>
+      </TouchableOpacity>
       <Text style={styles.title}>Pending Students</Text>
 
       {loading ? (
@@ -118,6 +123,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  backButton: {
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.md,
+  },
+  backText: {
+    ...typography.body,
+    color: colors.primary,
   },
   title: {
     ...typography.h2,

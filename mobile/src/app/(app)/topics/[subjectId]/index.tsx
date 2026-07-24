@@ -161,7 +161,7 @@ export default function TopicListScreen() {
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.backButton} onPress={goBack}>
-        <Text style={styles.backText}>Back</Text>
+        <Text style={styles.backText}>{'\u2190'} Back</Text>
       </TouchableOpacity>
 
       <Text style={styles.title}>{subjectName}</Text>
@@ -272,7 +272,6 @@ const styles = StyleSheet.create({
   backText: {
     ...typography.body,
     color: colors.primary,
-    fontWeight: '600',
   },
   title: {
     ...typography.h2,

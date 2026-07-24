@@ -10,10 +10,12 @@ import {
   Platform,
 } from 'react-native';
 import { Link } from 'expo-router';
+import { useSafeBack } from '../../utils/useSafeBack';
 import { supabase } from '../../utils/supabase';
 import { colors, spacing, typography } from '../../constants/theme';
 
 export default function ForgotPasswordScreen() {
+  const goBack = useSafeBack('/(auth)/sign-in');
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -51,6 +53,9 @@ export default function ForgotPasswordScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.inner}>
+        <TouchableOpacity style={styles.backButton} onPress={goBack}>
+          <Text style={styles.backText}>{'\u2190'} Back</Text>
+        </TouchableOpacity>
         <Text style={styles.title}>Reset Password</Text>
         <Text style={styles.subtitle}>
           Enter your email and we'll send you a reset link.
@@ -103,6 +108,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
+  },
+  backButton: {
+    marginBottom: spacing.md,
+  },
+  backText: {
+    ...typography.body,
+    color: colors.primary,
   },
   title: {
     ...typography.h1,

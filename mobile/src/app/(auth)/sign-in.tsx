@@ -10,10 +10,12 @@ import {
   Platform,
 } from 'react-native';
 import { router, Link } from 'expo-router';
+import { useSafeBack } from '../../utils/useSafeBack';
 import { useSession } from '../../utils/auth-context';
 import { colors, spacing, typography } from '../../constants/theme';
 
 export default function SignInScreen() {
+  const goBack = useSafeBack();
   const { session, profile, signIn } = useSession();
 
   // If already signed in but profile is not active, show pending message
@@ -50,6 +52,9 @@ export default function SignInScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.inner}>
+        <TouchableOpacity style={styles.backButton} onPress={goBack}>
+          <Text style={styles.backText}>{'\u2190'} Back</Text>
+        </TouchableOpacity>
         <Text style={styles.title}>Sign In</Text>
         <Text style={styles.subtitle}>Welcome back to Yeda</Text>
 
@@ -119,6 +124,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
+  },
+  backButton: {
+    marginBottom: spacing.md,
+  },
+  backText: {
+    ...typography.body,
+    color: colors.primary,
   },
   title: {
     ...typography.h1,

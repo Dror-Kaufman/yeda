@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Pressable } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
+import { useSafeBack } from '../../../../utils/useSafeBack';
 import { supabase } from '../../../../utils/supabase';
 import { colors, spacing, typography } from '../../../../constants/theme';
 import { useSession } from '../../../../utils/auth-context';
@@ -19,6 +20,7 @@ interface SubjectWithTopics extends Subject {
 
 export default function SubjectListScreen() {
   const { gradeId } = useLocalSearchParams<{ gradeId: string }>();
+  const goBack = useSafeBack('/(app)');
   const [gradeName, setGradeName] = useState<string | null>(null);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [topicCounts, setTopicCounts] = useState<Record<string, number>>({});
@@ -137,6 +139,9 @@ export default function SubjectListScreen() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity style={styles.backButton} onPress={goBack}>
+        <Text style={styles.backText}>{'\u2190'} Back</Text>
+      </TouchableOpacity>
       <Text style={styles.gradeName}>{gradeName}</Text>
       {canManage && (
         <TouchableOpacity style={styles.addButton} onPress={handleAddSubject}>
@@ -284,6 +289,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1000,
+  },
+  backButton: {
+    marginBottom: spacing.md,
+  },
+  backText: {
+    ...typography.body,
+    color: colors.primary,
   },
   actionBackdrop: {
     position: 'absolute',

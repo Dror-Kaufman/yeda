@@ -8,6 +8,7 @@ import {
   Pressable,
 } from 'react-native';
 import { router } from 'expo-router';
+import { useSafeBack } from '../../../utils/useSafeBack';
 import { useEffect, useState } from 'react';
 import { supabase } from '../../../utils/supabase';
 import { colors, spacing, typography } from '../../../constants/theme';
@@ -26,6 +27,7 @@ interface GradeWithSubjects extends Grade {
 }
 
 export default function GradeListScreen() {
+  const goBack = useSafeBack('/(app)');
   const [grades, setGrades] = useState<Grade[]>([]);
   const [subjectCounts, setSubjectCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
@@ -141,6 +143,9 @@ export default function GradeListScreen() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity style={styles.backButton} onPress={goBack}>
+        <Text style={styles.backText}>{'\u2190'} Back</Text>
+      </TouchableOpacity>
       <Text style={styles.title}>Select Grade</Text>
       <ScrollView
         style={styles.scrollView}
@@ -231,6 +236,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: colors.background,
+  },
+  backButton: {
+    marginBottom: spacing.md,
+  },
+  backText: {
+    ...typography.body,
+    color: colors.primary,
   },
   errorText: {
     ...typography.body,

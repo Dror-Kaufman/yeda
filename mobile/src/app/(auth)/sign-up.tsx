@@ -10,12 +10,14 @@ import {
   Platform,
 } from 'react-native';
 import { Link } from 'expo-router';
+import { useSafeBack } from '../../utils/useSafeBack';
 import { useSession } from '../../utils/auth-context';
 import { colors, spacing, typography } from '../../constants/theme';
 
 type SelectedRole = 'teacher' | 'student';
 
 export default function SignUpScreen() {
+  const goBack = useSafeBack('/(auth)/sign-in');
   const { session, profile, signUp } = useSession();
 
   // If already signed in but profile is pending (e.g. after refresh), show message
@@ -72,6 +74,9 @@ export default function SignUpScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.inner}>
+        <TouchableOpacity style={styles.backButton} onPress={goBack}>
+          <Text style={styles.backText}>{'\u2190'} Back</Text>
+        </TouchableOpacity>
         <Text style={styles.title}>Create Account</Text>
         <Text style={styles.subtitle}>Join Yeda as a teacher or student</Text>
 
@@ -169,6 +174,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
+  },
+  backButton: {
+    marginBottom: spacing.md,
+  },
+  backText: {
+    ...typography.body,
+    color: colors.primary,
   },
   title: {
     ...typography.h1,
