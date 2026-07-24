@@ -161,6 +161,7 @@ The safest approach: wrap everything in a `DO $$ ... END $$` block to capture ge
 - **`Alert.prompt` is iOS-only**: Already documented, but worth repeating — crashes on web and Android. Use `showPrompt()` from `src/utils/prompt.ts` instead.
 - **`dangerouslySetInnerHTML` not in RN View TypeScript types**: Even though react-native-web supports it at runtime, the React Native types don't include it. Use a ref-based approach: `const ref = useRef<View>(null); useEffect(() => { (ref.current as any).innerHTML = html; }, [html]); return <View ref={ref} />;`. See `src/components/LatexText.tsx` for a working example.
 - **CSS side-effect imports need type declaration**: Importing CSS files like `import 'katex/dist/katex.min.css'` requires `declare module '*.css' {}` in a `.d.ts` file (see `src/global.d.ts`).
+- **Google Docs iframe embedding blocked by SameSite cookies**: Modern browsers block third-party cookies in cross-site iframes. Google Docs requires cookies even in `/preview?embedded=true` mode. The cookie consent screen cannot be bypassed via URL parameters. The only reliable fix is opening the Google Doc URL in a new tab instead of embedding. See `session-20260724-topic-screen-streamline.md` for details.
 
 ## Expo Router Gotchas (added 2026-07-17)
 - **Deep nested routes need explicit Stack.Screen entries**: Both `topic/[topicId]/exercise` AND `topic/[topicId]/exercise/session` must each be registered in the layout's `<Stack>`. Omitting the intermediate parent route causes navigation failures.
