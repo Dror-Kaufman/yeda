@@ -1,6 +1,6 @@
 Read `docs/requirements.md`, `docs/session-20260717-wave4-complete.md`, `docs/session-20260721-rls-tightening.md`, and `docs/session-20260724-back-button-consolidation.md` first.
 
-**Status**: Wave 4 complete + RLS tightened + Back buttons consolidated.
+**Status**: Wave 4 complete + RLS tightened + Back buttons consolidated + Topic screen streamlined.
 
 ### What's Built (cumulative)
 - Expo app scaffolded with Expo Router, Supabase client, auth context
@@ -19,6 +19,10 @@ Read `docs/requirements.md`, `docs/session-20260717-wave4-complete.md`, `docs/se
 - 25 Jest unit tests — all passing
 - 14 Playwright E2E tests — all passing, all self-cleaning
 - 5 seed users: admin/teacher/student/unapproved_student@yeda.com (password123)
+- **Study materials now tappable from topic screen** — bypass study list, navigate directly to iframe view
+- **Study Mode button removed** from topic screen (materials accessible directly)
+- **Home screen** — no stale "No content available yet" placeholder for students
+- **Empty states** — consistent "No subjects yet" on grade screen (was empty card before)
 
 ### RLS Security Posture
 - All 6 app tables have RLS enabled
@@ -29,7 +33,9 @@ Read `docs/requirements.md`, `docs/session-20260717-wave4-complete.md`, `docs/se
 - Last migration: `20260721000006_rls_authenticated_select.sql`
 
 ### Suggested Next Steps (Phase 2)
-1. **Google OAuth** — add social login option alongside email/password
+1. **Google Docs iframe vs new tab** — The embedded iframe triggers a cross-site cookie consent screen that can't be bypassed via URL params. Consider switching to opening Google Doc URLs in a new browser tab instead (standard practice for external doc linking).
+2. **Study list screen orphaned** — `study/index.tsx` is no longer reachable from the topic screen. Consider removing.
+3. **Google OAuth** — add social login option alongside email/password
 2. **Full progress tracking** — per-question history, progress bars per topic
 3. **AI-powered MCQ generation** — generate questions from raw text uploads
 4. **Hebrew / RTL support** — full right-to-left layout for Hebrew users
@@ -47,6 +53,7 @@ Read `docs/requirements.md`, `docs/session-20260717-wave4-complete.md`, `docs/se
 - **Back button appearance** — Standardized to `← Back` with Unicode arrow (`\u2190`), consistent across all screens. Homepage has no back button.
 - **E2E tests must clean up after themselves** — use afterAll with docker exec psql or SERVICE_ROLE_KEY.
 - **Service role key bypasses RLS** — use for test cleanup, especially auth.users.
+- **Google Docs iframe embedding problems** — Cross-site SameSite cookie restrictions block Google Docs in iframes. `?embedded=true` and `/preview` endpoint don't bypass it. If the cookie consent screen appears, the only reliable fix is opening the URL in a new tab instead.
 - **Dedicated seed user for edge cases** — unapproved_student@yeda.com is the canonical pending-approval user.
 - **RLS changes via docker exec** — supabase stop && start doesn't re-apply migration policy changes. Use `docker exec -i supabase_db_yeda psql -U postgres -d postgres -c "..."` for live changes.
 - **Auth.role() = 'authenticated'** — use this pattern for restricting SELECT to logged-in users only.

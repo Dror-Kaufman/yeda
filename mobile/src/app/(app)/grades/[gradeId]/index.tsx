@@ -148,24 +148,30 @@ export default function SubjectListScreen() {
           <Text style={styles.addButtonText}>+ Add Subject</Text>
         </TouchableOpacity>
       )}
-      <View style={styles.card}>
-        {subjects.map((subject) => (
-          <TouchableOpacity
-            key={subject.id}
-            style={styles.subjectItem}
-            onPress={() => router.push(`/topics/${subject.id}`)}
-            onLongPress={() => handleLongPress(subject)}
-          >
-            <View style={styles.subjectContent}>
-              <Text style={styles.subjectName}>{subject.name}</Text>
-              <Text style={styles.subjectMeta}>
-                Topics: {topicCounts[subject.id] ?? 0}
-              </Text>
-            </View>
-            <Text style={styles.chevron}>›</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      {subjects.length === 0 ? (
+        <View style={styles.centered}>
+          <Text style={styles.emptyText}>No subjects yet</Text>
+        </View>
+      ) : (
+        <View style={styles.card}>
+          {subjects.map((subject) => (
+            <TouchableOpacity
+              key={subject.id}
+              style={styles.subjectItem}
+              onPress={() => router.push(`/topics/${subject.id}`)}
+              onLongPress={() => handleLongPress(subject)}
+            >
+              <View style={styles.subjectContent}>
+                <Text style={styles.subjectName}>{subject.name}</Text>
+                <Text style={styles.subjectMeta}>
+                  Topics: {topicCounts[subject.id] ?? 0}
+                </Text>
+              </View>
+              <Text style={styles.chevron}>›</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
 
       <ConfirmDialog
         visible={deleteConfirm !== null}
@@ -263,6 +269,10 @@ const styles = StyleSheet.create({
   chevron: {
     fontSize: 24,
     color: colors.textTertiary,
+  },
+  emptyText: {
+    ...typography.body,
+    color: colors.textSecondary,
   },
   errorText: {
     ...typography.body,

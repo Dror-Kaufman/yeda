@@ -49,11 +49,6 @@ export default function HomeScreen() {
           </TouchableOpacity>
         )}
 
-        {profile?.role === 'student' && (
-          <View style={styles.menuItem}>
-            <Text style={styles.menuText}>No content available yet</Text>
-          </View>
-        )}
       </View>
 
       <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>

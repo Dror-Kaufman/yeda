@@ -149,14 +149,22 @@ export default function TopicDetailScreen() {
 
           {studyMaterials.length > 0 ? (
             studyMaterials.map((material) => (
-              <View key={material.id} style={styles.materialCard}>
+              <TouchableOpacity
+                key={material.id}
+                style={styles.materialCard}
+                onPress={() =>
+                  router.push(
+                    `/topic/${topicId}/study/view?materialId=${material.id}`,
+                  )
+                }
+              >
                 <Text style={styles.materialTitle}>{material.title}</Text>
                 {material.description ? (
                   <Text style={styles.materialDescription}>
                     {material.description}
                   </Text>
                 ) : null}
-              </View>
+              </TouchableOpacity>
             ))
           ) : (
             <Text style={styles.emptyText}>
@@ -182,14 +190,7 @@ export default function TopicDetailScreen() {
             <Text style={styles.sectionTitle}>Modes</Text>
 
             <TouchableOpacity
-              style={styles.outlinedButton}
-              onPress={() => router.push(`/topic/${topicId}/study`)}
-            >
-              <Text style={styles.outlinedButtonText}>Study Mode</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.primaryButton, styles.modeButtonSpacing]}
+              style={styles.primaryButton}
               onPress={() => router.push(`/topic/${topicId}/exercise`)}
             >
               <Text style={styles.primaryButtonText}>Exercise Mode</Text>
